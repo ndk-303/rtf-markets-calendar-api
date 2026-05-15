@@ -1,0 +1,9 @@
+.env
+node_modules/
+logs/
+.git/
+.gitignore
+README.md
+*.md
+nginx/
+wordpress-examples/
