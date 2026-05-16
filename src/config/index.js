@@ -9,9 +9,10 @@ module.exports = {
   env: env('NODE_ENV', 'production'),
   port: parseInt(env('PORT', '3000'), 10),
 
-  serpApi: {
-    key: env('SERP_API_KEY', ''),
-    baseUrl: 'https://serpapi.com/search.json',
+  rapidApi: {
+    key: env('RAPID_API_KEY', '4fb66df06dmshcec1f10661b103ap1a206bjsnabfe6c736e1d'),
+    host: env('RAPID_API_HOST', 'tradingview-data1.p.rapidapi.com'),
+    baseUrl: 'https://tradingview-data1.p.rapidapi.com/api/calendar/economic',
     timeout: 10000,
     maxRetries: 3,
     retryDelay: 2000,

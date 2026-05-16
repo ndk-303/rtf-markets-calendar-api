@@ -1,6 +1,6 @@
 'use strict';
 
-const { getJson } = require('serpapi');
+const axios = require('axios');
 const config = require('../config');
 const logger = require('../utils/logger');
 const { retry } = require('../utils/retry');
@@ -9,48 +9,56 @@ const CACHE_KEY = 'market:indexes';
 const cacheManager = require('./cache/cacheManager');
 
 const transformData = (raw) => {
-  const markets = raw?.market_trends ?? [];
-  const indexes = markets[0];
   return {
-    indexes: indexes?.results ?? [],
+    indexes: raw?.data?.result ?? [],
     fetchedAt: new Date().toISOString(),
-    source: 'serpapi',
+    source: 'rapidapi',
   };
 };
 
-const fetchFromApi = () => {
-  return new Promise((resolve, reject) => {
-    getJson({
-      engine: 'google_finance_markets',
-      trend: 'indexes',
-      index_market: 'americas',
-      api_key: config.serpApi.key,
-    }, (json) => {
-      console.log('Data: ' + JSON.stringify(json, null, 2));
-      resolve(transformData(json));
+const fetchFromApi = async () => {
+  try {
+    const fromTime = 1769356800;
+    const toTime = 1769961599;
+
+    const response = await axios.get(config.rapidApi.baseUrl, {
+      params: {
+        from: fromTime.toString(),
+        to: toTime.toString(),
+        market: 'vietnam,america'
+      },
+      headers: {
+        'x-rapidapi-key': config.rapidApi.key,
+        'x-rapidapi-host': config.rapidApi.host
+      }
     });
-  });
+    console.log('Data: ' + JSON.stringify(response.data?.data?.result ?? response.data, null, 2));
+    return transformData(response.data);
+  } catch (error) {
+    logger.error('[rapidapi] Axios fetch failed', { error: error.message });
+    throw error;
+  }
 };
 
 const fetchMarketIndexes = async () => {
   return retry(fetchFromApi, {
-    retries: config.serpApi.maxRetries,
-    delay: config.serpApi.retryDelay,
-    label: 'serpapi:market-indexes',
+    retries: config.rapidApi.maxRetries,
+    delay: config.rapidApi.retryDelay,
+    label: 'rapidapi:market-indexes',
   });
 };
 
 const fetchAndCache = async () => {
-  logger.info('[serpapi] Fetching market indexes');
+  logger.info('[rapidapi] Fetching market indexes');
   try {
     const data = await fetchMarketIndexes();
     await cacheManager.set(CACHE_KEY, data, config.cache.ttl);
-    logger.info('[serpapi] Market indexes cached', {
+    logger.info('[rapidapi] Market indexes cached', {
       count: data.indexes?.length ?? 0,
     });
     return data;
   } catch (err) {
-    logger.error('[serpapi] Fetch failed', { error: err.message });
+    logger.error('[rapidapi] Fetch failed', { error: err.message });
     throw err;
   }
 };

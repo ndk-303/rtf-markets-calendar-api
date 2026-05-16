@@ -19,15 +19,14 @@
     "express-rate-limit": "^8.5.2",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
-    "morgan": "^1.10.0",
-    "serpapi": "^2.2.1"
+    "morgan": "^1.10.0"
   },
   "keywords": [
     "financial-api",
     "sse",
     "realtime",
     "redis",
-    "serpapi"
+    "rapidapi"
   ],
   "license": "MIT"
 }
