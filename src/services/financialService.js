@@ -18,14 +18,14 @@ const transformData = (raw) => {
 
 const fetchFromApi = async () => {
   try {
-    const fromTime = 1769356800;
-    const toTime = 1769961599;
+    const date = new Date();
+    const fromTime = Math.floor(date.getTime() / 1000 - 60 * 60 * 24 * 1);
+    const toTime = Math.floor(date.getTime() / 1000 + 60 * 60 * 24 * 1);
 
     const response = await axios.get(config.rapidApi.baseUrl, {
       params: {
-        from: fromTime.toString(),
-        to: toTime.toString(),
-        market: 'vietnam,america'
+        from: fromTime,
+        to: toTime,
       },
       headers: {
         'x-rapidapi-key': config.rapidApi.key,
